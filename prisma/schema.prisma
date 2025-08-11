@@ -1,0 +1,15 @@
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Readling {
+  id        String   @id @default(cuid())
+  title     String
+  author    String
+  createdAt DateTime @default(now())
+}
