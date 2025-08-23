@@ -1,5 +1,5 @@
 // app/page.tsx
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { ReadingListContainer } from "./_components/readling-list";
 import { HomeNavBar } from "./navbar";
 import { ContentHeaderPresentation } from "./_components/content-header";

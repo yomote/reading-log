@@ -1,11 +1,6 @@
 "use client";
 
 import {
-  Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardMedia,
   IconButton,
   Paper,
   Table,
@@ -14,10 +9,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
 } from "@mui/material";
 import TrashIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
 import { Reading } from "@prisma/client";
 import NiceModal from "@ebay/nice-modal-react";
 import { DeleteReadingModalPresentation } from "../delete-reading-modal";
