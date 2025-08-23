@@ -7,9 +7,15 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Readling {
+model Reading {
   id        String   @id @default(cuid())
   title     String
   author    String
+  link      String
+  pubDate   String
+  isbn      String?
+  jpno      String?
+  status    String   @default("unread")
+  note      String?
   createdAt DateTime @default(now())
 }
