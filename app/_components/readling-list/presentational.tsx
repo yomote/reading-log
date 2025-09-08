@@ -80,7 +80,10 @@ export function ReadingListPresentation({
                 </IconButton> */}
                 </TableCell>
                 <TableCell>
-                  <IconButton onClick={() => showDeleteModal(reading)}>
+                  <IconButton
+                    onClick={() => showDeleteModal(reading)}
+                    aria-label="show-delete-modal"
+                  >
                     <TrashIcon />
                   </IconButton>
                 </TableCell>
