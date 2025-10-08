@@ -1,14 +1,67 @@
+version: "3.9"
+
 services:
-  mssql:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: mssql-local
+  db:
+    image: mysql:8.0
+    container_name: readinglog-mysql
+    restart: unless-stopped
+    command: >-
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --innodb_flush_log_at_trx_commit=1
+      --binlog_expire_logs_seconds=864000
     environment:
-      ACCEPT_EULA: "Y"
-      SA_PASSWORD: "P@ssw0rd123!" # 変更可
-      MSSQL_PID: "Developer"
+      MYSQL_ROOT_PASSWORD: rootpass # 開発用: 本番では Secrets 管理
+      MYSQL_DATABASE: readinglog
+      MYSQL_USER: readinglog
+      MYSQL_PASSWORD: readinglog
     ports:
-      - "1433:1433"
+      - "3306:3306" # ホスト公開 (開発用)。本番では削除。
     volumes:
-      - mssql_data:/var/opt/mssql
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-prootpass"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  # ブラウザから簡易確認したい場合: http://localhost:8080
+  adminer:
+    image: adminer:latest
+    container_name: readinglog-adminer
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # 任意: ローカルで初回 migrate を自動適用したい場合に使う補助コンテナ
+  # 起動後 tail -f で常駐; 不要なら docker compose run --rm migrate 方式に変更可
+  migrate:
+    image: node:20-alpine
+    container_name: readinglog-prisma-migrate
+    working_dir: /workspace
+    restart: "no"
+    environment:
+      DATABASE_URL: mysql://readinglog:readinglog@db:3306/readinglog
+      # shadow DB 別管理したい場合は以下コメント解除 & schema.prisma に shadowDatabaseUrl 設定
+      # SHADOW_DATABASE_URL: mysql://readinglog:readinglog@db:3306/prisma_shadow
+    volumes:
+      - ..:/workspace:cached
+    entrypoint:
+      [
+        "sh",
+        "-c",
+        "set -e; npm install --no-fund --no-audit >/dev/null 2>&1 || true; npx prisma migrate dev --name init; echo 'migrate done'; tail -f /dev/null",
+      ]
+    depends_on:
+      db:
+        condition: service_healthy
+
+networks: {}
 volumes:
-  mssql_data:
+  mysql_data:

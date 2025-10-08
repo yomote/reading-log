@@ -1,4 +1,7 @@
 // app/page.tsx
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 import { Box } from "@mui/material";
 import { ReadingListContainer } from "./_components/readling-list";
 import { HomeNavBar } from "./navbar";

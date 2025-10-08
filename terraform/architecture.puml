@@ -1,0 +1,74 @@
+@startuml VPC
+' Uncomment the line below for "dark mode" styling
+'!$AWS_DARK = true
+
+!define AWSPuml https://raw.githubusercontent.com/awslabs/aws-icons-for-plantuml/v20.0/dist
+!include AWSPuml/AWSCommon.puml
+!include AWSPuml/AWSSimplified.puml
+!include AWSPuml/Compute/EC2.puml
+!include AWSPuml/Compute/EC2Instance.puml
+!include AWSPuml/Groups/AWSCloud.puml
+!include AWSPuml/Groups/VPC.puml
+!include AWSPuml/Groups/AvailabilityZone.puml
+!include AWSPuml/Groups/PublicSubnet.puml
+!include AWSPuml/Groups/PrivateSubnet.puml
+!include AWSPuml/NetworkingContentDelivery/VPCNATGateway.puml
+!include AWSPuml/NetworkingContentDelivery/VPCInternetGateway.puml
+!include AWSPuml/General/Client.puml
+!include AWSPuml/NetworkingContentDelivery/ElasticLoadBalancingApplicationLoadBalancer.puml
+!include AWSPuml/NetworkingContentDelivery/Route53.puml
+!include AWSPuml/Database/RDS.puml
+!include AWSPuml/SecurityIdentityCompliance/CertificateManager.puml
+!include AWSPuml/SecurityIdentityCompliance/SecretsManager.puml
+!include AWSPuml/Containers/ElasticContainerRegistry.puml
+!include AWSPuml/Containers/ElasticContainerService.puml
+!include AWSPuml/ManagementGovernance/CloudWatch.puml
+!include AWSPuml/Storage/SimpleStorageService.puml
+
+hide stereotype
+skinparam linetype ortho
+
+AWSCloudGroup(cloud) {
+  ' External AWS services (outside VPC)
+  rectangle "Route53 Hosted Zone\n<$Route53>" as R53
+  rectangle "ACM Certificate\n<$CertificateManager>" as ACM
+  rectangle "Secrets Manager\n<$SecretsManager>" as secrets
+  rectangle "Amazon S3\n<$SimpleStorageService>" as s3
+  rectangle "Amazon ECR\n<$ElasticContainerRegistry>" as ecr
+
+  VPCGroup(vpc) {
+    rectangle "Internet gateway\n<$VPCInternetGateway>" as internet_gateway
+
+    AvailabilityZoneGroup(az_1, "\tAvailability Zone 1\t") {
+      PublicSubnetGroup(az_1_public, "Public subnet") {
+        rectangle "ALB\n<$ElasticLoadBalancingApplicationLoadBalancer>" as alb #Transparent
+        VPCNATGateway(az_1_nat_gateway, "NAT gateway", "") #Transparent
+      }
+      PrivateSubnetGroup(az_1_private, "Private subnet") {
+        rectangle "App (ECS Fargate)\n<$ElasticContainerService>" as app1 #Transparent
+  rectangle "Amazon RDS (MySQL)\n<$RDS>" as db1 #Transparent
+      }
+
+      app1 .u.> az_1_nat_gateway
+    }
+    az_1_nat_gateway ..> internet_gateway
+  }
+}
+
+' Client outside AWS cloud for clarity
+rectangle "User Browser\n<$Client>" as user
+
+' Minimal relationships (unlabeled to avoid style warnings)
+user --> R53
+R53 --> alb
+alb --> app1
+app1 --> db1
+app1 ..> ACM
+app1 ..> secrets
+
+' Auxiliary (dotted) flows
+app1 ..> R53
+app1 ..> s3
+app1 ..> ecr
+
+@enduml

@@ -40,5 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# terraform (一時的)
-terraform
+# terraform
+.terraform
+*.tfstate
+*.tfstate.backup
+backend.hcl
+
+# vscode
+.vscode/*

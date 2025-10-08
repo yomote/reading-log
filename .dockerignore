@@ -1,0 +1,15 @@
+# Ignore local env files
+.env
+prisma/.env
+
+# Node/Next defaults
+node_modules
+.next
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store
+
+# VCS
+.git
+.gitignore
